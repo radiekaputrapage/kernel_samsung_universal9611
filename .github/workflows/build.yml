@@ -1,45 +1,42 @@
-name: Build Kernel - Galaxy A51 (OneUI)
+name: build
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - Grass-Unified  # ganti dengan branch kernel kamu
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: 🧩 Checkout source
-      uses: actions/checkout@v4
-      with:
-        submodules: recursive
+      - name: Checkout source
+        uses: actions/checkout@v4
 
-    - name: ⚙️ Install dependencies
-      run: |
-        sudo apt update
-        sudo apt install -y git make libssl-dev curl bc pkg-config m4 libtool automake autoconf python3
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y bash git make libssl-dev curl bc pkg-config m4 libtool automake autoconf python3 tar
 
-    - name: 🧰 Clone WeebX-Clang toolchain
-      run: |
-        git clone --depth=1 https://github.com/XSans0/WeebX-Clang clang
-        export PATH=$(pwd)/clang/bin:$PATH
-        ln -sf $(pwd)/clang $(pwd)/toolchain
-        echo "🔧 Linked clang → toolchain"
+      - name: Download & Extract WeebX Clang
+        run: |
+          echo "🔧 Downloading WeebX Clang..."
+          wget "$(curl -s https://raw.githubusercontent.com/XSans0/WeebX-Clang/main/main/link.txt)" -O weebx-clang.tar.gz
+          mkdir -p toolchain
+          tar -xvf weebx-clang.tar.gz -C toolchain
+          rm -rf weebx-clang.tar.gz
+          echo "✅ Toolchain installed to ./toolchain"
 
-    - name: 🚀 Start build for Galaxy A51 (OneUI)
-      run: |
-        echo "🔨 Starting build process..."
-        python3 build_kernel.py --oneui --target=a51
+      - name: Set PATH for Clang
+        run: |
+          export PATH=$(pwd)/toolchain/bin:$PATH
+          echo $PATH
 
-    - name: 📦 Upload built kernel (zImage, dtb, etc)
-      if: success()
-      uses: actions/upload-artifact@v4
-      with:
-        name: Galaxy-A51-OneUI-Kernel
-        path: |
-          out/
-          AnyKernel3/
-          *.zip
-          *.img
+      - name: Build kernel (Galaxy A51 OneUI)
+        run: |
+          echo "🚀 Starting build for Galaxy A51 (OneUI)"
+          python3 build_kernel.py --oneui --target=a51
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: OneUI-A51-Kernel
+          path: out/
