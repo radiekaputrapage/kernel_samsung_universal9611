@@ -35,8 +35,8 @@ jobs:
           echo "🚀 Starting build for Galaxy A51 (OneUI)"
           python3 build_kernel.py --oneui --target=a51
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: OneUI-A51-Kernel
-          path: out/
+- name: Upload Flashable Kernel Zip
+  uses: actions/upload-artifact@v4
+  with:
+    name: GrassKernel_A51_OneUI
+    path: AnyKernel3/*.zip
