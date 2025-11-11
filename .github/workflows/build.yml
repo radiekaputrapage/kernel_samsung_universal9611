@@ -1,0 +1,38 @@
+name: OneUI Kernel Build (Galaxy A51)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y git make libssl-dev curl bc pkg-config m4 libtool automake autoconf python3
+
+      - name: Clone WeebX Clang
+        run: |
+          git clone --depth=1 https://github.com/XSans0/WeebX-Clang clang
+          echo "Clang toolchain cloned."
+
+      - name: Setup environment
+        run: |
+          export PATH=$(pwd)/clang/bin:$PATH
+          export KBUILD_BUILD_USER="github-actions"
+          export KBUILD_BUILD_HOST="ubuntu-runner"
+
+      - name: Build Kernel
+        run: |
+          echo "Starting build for Galaxy A51 (OneUI)"
+          python3 build_kernel.py --oneui --target=a51
+
+      - name: Upload build result
+        uses: actions/upload-artifact@v4
+        with:
+          name: kernel-output
+          path: out/
