@@ -1,43 +1,45 @@
-name: OneUI Kernel Build (Galaxy A51)
+name: Build Kernel - Galaxy A51 (OneUI)
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - Grass-Unified  # ganti dengan branch kernel kamu
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout source
-        uses: actions/checkout@v4
+    - name: 🧩 Checkout source
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
 
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y git make libssl-dev curl bc pkg-config m4 libtool automake autoconf python3
+    - name: ⚙️ Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y git make libssl-dev curl bc pkg-config m4 libtool automake autoconf python3
 
-      - name: Clone WeebX Clang
-        run: |
-          git clone --depth=1 https://github.com/XSans0/WeebX-Clang clang
-          echo "Clang toolchain cloned."
+    - name: 🧰 Clone WeebX-Clang toolchain
+      run: |
+        git clone --depth=1 https://github.com/XSans0/WeebX-Clang clang
+        export PATH=$(pwd)/clang/bin:$PATH
+        ln -sf $(pwd)/clang $(pwd)/toolchain
+        echo "🔧 Linked clang → toolchain"
 
-      - name: Setup environment
-        run: |
-          export PATH=$(pwd)/clang/bin:$PATH
-          export KBUILD_BUILD_USER="github-actions"
-          export KBUILD_BUILD_HOST="ubuntu-runner"
+    - name: 🚀 Start build for Galaxy A51 (OneUI)
+      run: |
+        echo "🔨 Starting build process..."
+        python3 build_kernel.py --oneui --target=a51
 
-      - name: Build Kernel
-        run: |
-            echo "🔧 Linking clang as toolchain..."
-            ln -s $(pwd)/clang $(pwd)/toolchain
-
-            export PATH=$(pwd)/clang/bin:$PATH
-            echo "🚀 Starting build for Galaxy A51 (OneUI)"
-            python3 build_kernel.py --oneui --target=a51
-
-
-      - name: Upload build result
-        uses: actions/upload-artifact@v4
-        with:
-          name: kernel-output
-          path: out/
+    - name: 📦 Upload built kernel (zImage, dtb, etc)
+      if: success()
+      uses: actions/upload-artifact@v4
+      with:
+        name: Galaxy-A51-OneUI-Kernel
+        path: |
+          out/
+          AnyKernel3/
+          *.zip
+          *.img
