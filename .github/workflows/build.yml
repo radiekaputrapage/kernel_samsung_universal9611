@@ -28,8 +28,13 @@ jobs:
 
       - name: Build Kernel
         run: |
-          echo "Starting build for Galaxy A51 (OneUI)"
-          python3 build_kernel.py --oneui --target=a51
+            echo "🔧 Linking clang as toolchain..."
+            ln -s $(pwd)/clang $(pwd)/toolchain
+
+            export PATH=$(pwd)/clang/bin:$PATH
+            echo "🚀 Starting build for Galaxy A51 (OneUI)"
+            python3 build_kernel.py --oneui --target=a51
+
 
       - name: Upload build result
         uses: actions/upload-artifact@v4
