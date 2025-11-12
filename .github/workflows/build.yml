@@ -39,4 +39,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: OneUI-A51-Kernel
-          path: kernel_samsung_universal9611/*.zip
+          path: GrassKernel_a51_OneUI_*.zip
